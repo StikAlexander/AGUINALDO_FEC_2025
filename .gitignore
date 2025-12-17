@@ -1,0 +1,36 @@
+# Archivos de sesión
+sesiones.json
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Logs
+*.log
+
+# Carpetas de dependencias
+node_modules/
+vendor/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-*
+
+# Archivos de configuración local
+config.local.php
+.env
+
+# PDFs generados
+*.pdf
+
+# Backups
+*_backup.*
+backup/

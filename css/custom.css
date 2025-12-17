@@ -1,0 +1,62 @@
+.verde
+{
+    background: #88a80d;
+    color:#ffffff;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500px;
+    border-radius: 0px;
+    padding: 5px;
+}
+
+.tituloverde
+{    
+    color:#88a80d;        
+    font-size: 20px;
+    font-weight: bold;    
+}
+
+
+.verde2
+{
+    background: #88a80d;
+    color:#ffffff;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500px;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+input
+{
+    border-radius: 30px !important;
+    margin: 4px 0px;
+}
+
+select
+{
+    border-radius: 30px !important;
+    margin: 4px 0px !important;
+}
+
+.btn
+{
+    border-radius: 30px;
+}
+
+
+body {
+  font-family: "Montserrat", sans-serif;
+  
+  color: #333;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
