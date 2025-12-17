@@ -178,57 +178,467 @@ if($a=="home")
 
     $sesiones = json_decode(file_get_contents('sesiones.json'), true);
     $sesion = $sesiones[$_COOKIE['fecagu']];
+
+    // Variables para la plantilla
+    $VERMENSAJE = 'none';
+    $MENSAJE = '';
+    $TABLA = 'none';
+    $IDENTIFICACION = '';
+    $NOMBRE = '';
+    $PRODUCTO = '';
+    $ESTADO = '';
+    $ID_SOLICITUD = '';
+
+    if(isset($_GET['m'])) {
+        $MENSAJE = $_GET['m'];
+        $VERMENSAJE = 'block';
+    }
     ?>
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Aguinaldo 2025 - Bienvenido</title>
-        <link href="css/bootstrap.css" rel="stylesheet">
-        <link href="css/custom.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    </head>
-    <body>
-        <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-success">
-            <div class="container">
-                <a href="index.php?a=home" class="navbar-brand">Aguinaldo 2025</a>
-                <div class="navbar-nav ml-auto">
-                    <span class="navbar-text text-white mr-3">
-                        <i class="fas fa-user"></i> <?php echo $sesion['nombre']; ?>
-                    </span>
-                    <a href="index.php?a=salir" class="btn btn-outline-light btn-sm">
-                        <i class="fas fa-sign-out-alt"></i> Salir
-                    </a>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.png">
+
+    <title>Fecolsubsidio - Aguinaldo FEC 2025</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/custom.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/d29ca2114a.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  </head>
+
+  <body>
+
+<div class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+      <div class="container">
+        <a href="index.php?a=home" class="navbar-brand"><img src="images/logob.png" style="height:35px;"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+              <a class="nav-link" href="index.php?a=home"> <i class="fas fa-home"></i> Inicio</a>
+            </li>
+
+            <li class="nav-item">
+            <a class="nav-link" href="index.php?a=salir"> <i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container" role="main">
+        <div class="alert alert-success" style="display:<?php echo $VERMENSAJE; ?>;">
+        <?php echo $MENSAJE; ?>
         </div>
 
-        <div class="container" style="margin-top: 100px;">
-            <div class="alert alert-success">
-                <h4><i class="fas fa-check-circle"></i> ¡Acceso exitoso!</h4>
-                <p>Bienvenido <?php echo $sesion['nombre']; ?></p>
-            </div>
 
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5><i class="fas fa-gift"></i> Generar PDF de Aguinaldo</h5>
-                </div>
-                <div class="card-body">
-                    <p>Aquí podrá generar su certificado de aguinaldo personalizado.</p>
-                    <a href="generar_pdf.php" class="btn btn-primary">
-                        <i class="fas fa-file-pdf"></i> Generar PDF
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <script src="js/jquery.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-    </body>
-    </html>
+
+
+<div style="width:auto;padding:10px;color:#ffffff;background: #000000;font-size: 26px; text-align: center;">Aguinaldo FEC 2025</div>
+<br/><br/>
+
+<form action="?a=buscar" method="post">
+<div class="row">
+    <div class="col-lg-2"></div>
+
+    <div class="col-lg-4">
+        <label for="identificacion" style="font-weight: bold;">Ingrese el numero de cedula del asociado</label>
+        <input type="number" required class="form-control" id="identificacion" name="identificacion">
+    </div>
+    <div class="col-lg-4">
+        <label>&nbsp;</label>
+        <input type="submit" value="Buscar" class="btn btn-success form-control" style="border-radius: 10px;">
+
+    </div>
+
+    <div class="col-lg-2"></div>
+</div>
+</form>
+<br/><br/>
+<table class="table table-striped" style="display:<?php echo $TABLA; ?>;">
+    <tr>
+        <td>Cedula</td>
+        <td>Nombre</td>
+        <td>Producto</td>
+        <td>Estado</td>
+        <td></td>
+
+    </tr>
+
+    <tr>
+        <td><?php echo $IDENTIFICACION; ?></td>
+        <td><?php echo $NOMBRE; ?></td>
+        <td><?php echo $PRODUCTO; ?></td>
+        <td><?php echo $ESTADO; ?></td>
+        <td>
+            <a href="?a=generar_pdf&identificacion=<?php echo $IDENTIFICACION; ?>">
+            <div class="btn btn-success form-control" style="border-radius: 10px;">Generar PDF</div>
+            </a>
+            </td>
+
+    </tr>
+
+</table>
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="js/popper.min.js"></script>
+
+    <script>
+
+
+
+
+
+
+
+  </body>
+</html>
     <?php
     exit;
+}
+
+// ========== ACCIÓN: BUSCAR ==========
+if($a=="buscar")
+{
+    if(!$_COOKIE['fecagu'] || !$_COOKIE['fecaguotp']){
+        header("Location: index.php");
+        exit;
+    }
+
+    $sesiones = json_decode(file_get_contents('sesiones.json'), true);
+    $sesion = $sesiones[$_COOKIE['fecagu']];
+
+    $identificacion_buscar = $_POST['identificacion'];
+
+    // Cargar librería PhpSpreadsheet
+    require 'vendor/autoload.php';
+
+    try {
+        $archivo_excel = 'base_datos_aguinaldo_2025.xlsx';
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($archivo_excel);
+        $hoja = $spreadsheet->getSheetByName('base de datos');
+
+        $encontrado = false;
+        $datos = [];
+
+        // Recorrer filas buscando la identificación
+        foreach ($hoja->getRowIterator() as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getCalculatedValue();
+            }
+
+            // Verificar si la columna A coincide con la identificación
+            if(isset($rowData[0]) && $rowData[0] == $identificacion_buscar) {
+                $encontrado = true;
+                $datos = [
+                    'identificacion' => $rowData[0],
+                    'nombre' => $rowData[1] ?? '',
+                    'valor_aguinaldo' => floatval($rowData[2] ?? 0),
+                    'valor_retencion' => floatval($rowData[3] ?? 0),
+                    'valor_abonado' => floatval($rowData[4] ?? 0)
+                ];
+                break;
+            }
+        }
+
+        if($encontrado) {
+            // Redirigir con los datos encontrados
+            header("Location: index.php?a=mostrar_resultado&identificacion=" . $datos['identificacion'] .
+                   "&nombre=" . urlencode($datos['nombre']) .
+                   "&valor_aguinaldo=" . $datos['valor_aguinaldo'] .
+                   "&valor_retencion=" . $datos['valor_retencion'] .
+                   "&valor_abonado=" . $datos['valor_abonado']);
+            exit;
+        } else {
+            header("Location: index.php?a=home&m=" . urlencode("No se encontró registro para la cédula: $identificacion_buscar"));
+            exit;
+        }
+
+    } catch(Exception $e) {
+        header("Location: index.php?a=home&m=" . urlencode("Error al buscar en el archivo Excel: " . $e->getMessage()));
+        exit;
+    }
+}
+
+// ========== ACCIÓN: MOSTRAR RESULTADO ==========
+if($a=="mostrar_resultado")
+{
+    if(!$_COOKIE['fecagu'] || !$_COOKIE['fecaguotp']){
+        header("Location: index.php");
+        exit;
+    }
+
+    $sesiones = json_decode(file_get_contents('sesiones.json'), true);
+    $sesion = $sesiones[$_COOKIE['fecagu']];
+
+    // Variables para la plantilla
+    $VERMENSAJE = 'none';
+    $MENSAJE = '';
+    $TABLA = 'table';
+    $IDENTIFICACION = $_GET['identificacion'] ?? '';
+    $NOMBRE = $_GET['nombre'] ?? '';
+    $PRODUCTO = 'Aguinaldo 2025';
+    $ESTADO = 'Pendiente';
+
+    ?>\n<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.png">
+
+    <title>Fecolsubsidio - Aguinaldo FEC 2025</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/custom.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/d29ca2114a.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  </head>
+
+  <body>
+
+<div class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+      <div class="container">
+        <a href="index.php?a=home" class="navbar-brand"><img src="images/logob.png" style="height:35px;"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+              <a class="nav-link" href="index.php?a=home"> <i class="fas fa-home"></i> Inicio</a>
+            </li>
+
+            <li class="nav-item">
+            <a class="nav-link" href="index.php?a=salir"> <i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container" role="main">
+        <div class="alert alert-success" style="display:<?php echo $VERMENSAJE; ?>;">
+        <?php echo $MENSAJE; ?>
+        </div>
+
+
+
+
+<div style="width:auto;padding:10px;color:#ffffff;background: #000000;font-size: 26px; text-align: center;">Aguinaldo FEC 2025</div>
+<br/><br/>
+
+<form action="?a=buscar" method="post">
+<div class="row">
+    <div class="col-lg-2"></div>
+
+    <div class="col-lg-4">
+        <label for="identificacion" style="font-weight: bold;">Ingrese el numero de cedula del asociado</label>
+        <input type="number" required class="form-control" id="identificacion" name="identificacion">
+    </div>
+    <div class="col-lg-4">
+        <label>&nbsp;</label>
+        <input type="submit" value="Buscar" class="btn btn-success form-control" style="border-radius: 10px;">
+
+    </div>
+
+    <div class="col-lg-2"></div>
+</div>
+</form>
+<br/><br/>
+<table class="table table-striped" style="display:<?php echo $TABLA; ?>;">
+    <tr>
+        <td>Cedula</td>
+        <td>Nombre</td>
+        <td>Producto</td>
+        <td>Estado</td>
+        <td></td>
+
+    </tr>
+
+    <tr>
+        <td><?php echo $IDENTIFICACION; ?></td>
+        <td><?php echo $NOMBRE; ?></td>
+        <td><?php echo $PRODUCTO; ?></td>
+        <td><?php echo $ESTADO; ?></td>
+        <td>
+            <a href="?a=generar_pdf&identificacion=<?php echo $IDENTIFICACION; ?>">
+            <div class="btn btn-success form-control" style="border-radius: 10px;">Generar PDF</div>
+            </a>
+            </td>
+
+    </tr>
+
+</table>
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="js/popper.min.js"></script>
+
+    <script>
+
+
+
+
+
+
+
+  </body>
+</html>
+    <?php
+    exit;
+}
+
+// ========== ACCIÓN: GENERAR PDF ==========
+if($a=="generar_pdf")
+{
+    if(!$_COOKIE['fecagu'] || !$_COOKIE['fecaguotp']){
+        header("Location: index.php");
+        exit;
+    }
+
+    $identificacion_buscar = $_GET['identificacion'];
+
+    // Cargar librería PhpSpreadsheet
+    require 'vendor/autoload.php';
+
+    try {
+        $archivo_excel = 'base_datos_aguinaldo_2025.xlsx';
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($archivo_excel);
+        $hoja = $spreadsheet->getSheetByName('base de datos');
+
+        $encontrado = false;
+        $datos = [];
+
+        // Recorrer filas buscando la identificación
+        foreach ($hoja->getRowIterator() as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getCalculatedValue();
+            }
+
+            // Verificar si la columna A coincide con la identificación
+            if(isset($rowData[0]) && $rowData[0] == $identificacion_buscar) {
+                $encontrado = true;
+                $datos = [
+                    'identificacion' => $rowData[0],
+                    'nombre' => $rowData[1] ?? '',
+                    'valor_aguinaldo' => floatval($rowData[2] ?? 0),
+                    'valor_retencion' => floatval($rowData[3] ?? 0),
+                    'valor_abonado' => floatval($rowData[4] ?? 0)
+                ];
+                break;
+            }
+        }
+
+        if(!$encontrado) {
+            header("Location: index.php?a=home&m=" . urlencode("No se encontró registro para generar el PDF"));
+            exit;
+        }
+
+        // Generar PDF usando FPDF/FPDI
+        require('fpdf/fpdf.php');
+        require('vendor/autoload.php');
+
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf->AddPage();
+
+        // Importar la plantilla PDF existente
+        $pdf->setSourceFile('plantilla_aguinaldo.pdf');
+        $tplId = $pdf->importPage(1);
+        $pdf->useTemplate($tplId);
+
+        // Configurar fuente
+        $pdf->SetFont('Helvetica', '', 12);
+        $pdf->SetTextColor(0, 0, 0);
+
+        // Escribir los 4 campos en coordenadas fijas (ajustar según tu plantilla)
+        // Campo 1: Estimado(a) - Nombre completo
+        $pdf->SetXY(50, 60);
+        $pdf->Write(0, $datos['nombre']);
+
+        // Campo 2: Valor aguinaldo 2025
+        $pdf->SetXY(50, 80);
+        $pdf->Write(0, '$' . number_format($datos['valor_aguinaldo'], 0, ',', '.'));
+
+        // Campo 3: Valor retención en la fuente
+        $pdf->SetXY(50, 100);
+        $pdf->Write(0, '$' . number_format($datos['valor_retencion'], 0, ',', '.'));
+
+        // Campo 4: Valor abonado a los depósitos
+        $pdf->SetXY(50, 120);
+        $pdf->Write(0, '$' . number_format($datos['valor_abonado'], 0, ',', '.'));
+
+        // Salida del PDF
+        $pdf->Output('I', 'Aguinaldo_' . $identificacion_buscar . '.pdf');
+        exit;
+
+    } catch(Exception $e) {
+        header("Location: index.php?a=home&m=" . urlencode("Error al generar el PDF: " . $e->getMessage()));
+        exit;
+    }
 }
 
 // ========== ACCIÓN: SALIR ==========

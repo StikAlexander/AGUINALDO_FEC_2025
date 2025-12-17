@@ -1,36 +1,65 @@
-# Archivos de sesión
+# Dependencias de Composer
+/vendor/
+composer.lock
+
+# Archivos de sesiones y datos sensibles
 sesiones.json
+
+# Archivos de datos (Excel con información real)
+base_datos_aguinaldo_2025.xlsx
+
+# Archivos de ejemplo y prueba
+phpinfo.php
+crear_plantilla_ejemplo.php
+crear_excel_ejemplo.php
+
+# Plantilla PDF (descomentar si contiene información sensible)
+# plantilla_aguinaldo.pdf
+
+# PDFs generados
+*.pdf
+!plantilla_aguinaldo.pdf
+
 
 # Archivos temporales
 *.tmp
+*.temp
 *.bak
 *.swp
 *~
 
 # Logs
 *.log
+error_log
+debug.log
 
-# Carpetas de dependencias
-node_modules/
-vendor/
-
-# Archivos del sistema operativo
+# Sistema operativo
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# IDEs
+# IDEs y editores
 .vscode/
 .idea/
-*.sublime-*
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Carpetas
+node_modules/
+cache/
+tmp/
+temp/
+backup/
+doc/
+font/
+fpdf/
+makefont/
 
 # Archivos de configuración local
 config.local.php
 .env
-
-# PDFs generados
-*.pdf
+.env.local
 
 # Backups
 *_backup.*
-backup/

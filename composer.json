@@ -1,0 +1,20 @@
+{
+    "name": "fecolsubsidio/aguinaldo-fec-2025",
+    "description": "Sistema de generación de PDF de aguinaldo desde Excel",
+    "type": "project",
+    "require": {
+        "php": ">=8.0 <8.3",
+        "phpoffice/phpspreadsheet": "1.29.4",
+        "setasign/fpdi": "^2.3"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.12"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
