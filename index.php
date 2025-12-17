@@ -336,15 +336,14 @@ if($a=="buscar")
         exit;
     }
 
-    $sesiones = json_decode(file_get_contents('sesiones.json'), true);
-    $sesion = $sesiones[$_COOKIE['fecagu']];
-
     $identificacion_buscar = $_POST['identificacion'];
 
-    // Cargar librería PhpSpreadsheet
+    // Cargar librerías
     require 'vendor/autoload.php';
+    require('fpdf/fpdf.php');
 
     try {
+        // Leer Excel
         $archivo_excel = 'base_datos_aguinaldo_2025.xlsx';
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($archivo_excel);
         $hoja = $spreadsheet->getSheetByName('base de datos');
@@ -352,7 +351,7 @@ if($a=="buscar")
         $encontrado = false;
         $datos = [];
 
-        // Recorrer filas buscando la identificación
+        // Buscar la cédula en el Excel
         foreach ($hoja->getRowIterator() as $row) {
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
@@ -362,7 +361,6 @@ if($a=="buscar")
                 $rowData[] = $cell->getCalculatedValue();
             }
 
-            // Verificar si la columna A coincide con la identificación
             if(isset($rowData[0]) && $rowData[0] == $identificacion_buscar) {
                 $encontrado = true;
                 $datos = [
@@ -376,21 +374,52 @@ if($a=="buscar")
             }
         }
 
-        if($encontrado) {
-            // Redirigir con los datos encontrados
-            header("Location: index.php?a=mostrar_resultado&identificacion=" . $datos['identificacion'] .
-                   "&nombre=" . urlencode($datos['nombre']) .
-                   "&valor_aguinaldo=" . $datos['valor_aguinaldo'] .
-                   "&valor_retencion=" . $datos['valor_retencion'] .
-                   "&valor_abonado=" . $datos['valor_abonado']);
-            exit;
-        } else {
+        if(!$encontrado) {
             header("Location: index.php?a=home&m=" . urlencode("No se encontró registro para la cédula: $identificacion_buscar"));
             exit;
         }
 
+        // Generar PDF directamente
+        $pdf = new \setasign\Fpdi\Fpdi();
+
+        $pdf->setSourceFile('plantilla_aguinaldo.pdf');
+        $tplId = $pdf->importPage(1);
+
+        $size = $pdf->getImportedPageSize($tplId);
+        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+
+        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+        $pdf->useTemplate($tplId);
+
+        // Configurar fuente y escribir datos
+        $pdf->SetTextColor(0, 0, 0);
+
+        // Campo 1: Nombre
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(8, 98.5);
+        $pdf->Write(0, $datos['nombre']);
+
+        // Campo 2: Valor aguinaldo
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(127, 98.5);
+        $pdf->Write(0, '$' . number_format($datos['valor_aguinaldo'], 0, ',', '.'));
+
+        // Campo 3: Retención
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(41, 118);
+        $pdf->Write(0, '$' . number_format($datos['valor_retencion'], 0, ',', '.'));
+
+        // Campo 4: Valor abonado
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(127, 118);
+        $pdf->Write(0, '$' . number_format($datos['valor_abonado'], 0, ',', '.'));
+
+        // Descargar PDF
+        $pdf->Output('D', 'Aguinaldo_' . $identificacion_buscar . '.pdf');
+        exit;
+
     } catch(Exception $e) {
-        header("Location: index.php?a=home&m=" . urlencode("Error al buscar en el archivo Excel: " . $e->getMessage()));
+        header("Location: index.php?a=home&m=" . urlencode("Error: " . $e->getMessage()));
         exit;
     }
 }
@@ -625,7 +654,7 @@ if($a=="generar_pdf")
         // Escribir los 4 campos en coordenadas fijas (ajustar según tu plantilla)
         // Campo 1: Estimado(a) - Nombre completo
         $pdf->SetFont('Helvetica', '', 10);
-        $pdf->SetXY(10, 98.5);
+        $pdf->SetXY(8, 98.5);
         $pdf->Write(0, $datos['nombre']);
 
         // Campo 2: Valor aguinaldo 2025
