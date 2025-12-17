@@ -1,9 +1,11 @@
 <?php
 include('funciones.php');
+include('db.php');
 ini_set('display_errors', 1);
 
 // Obtener parámetro de acción
 $a = isset($_GET['a']) ? $_GET['a'] : '';
+$db = new Database();
 
 // ========== ACCIÓN: LOGIN ==========
 if($a=='login')
@@ -43,23 +45,12 @@ if($a=='login')
 
         $codigo= random_int(10000, 99999);
 
-        // Guardar sesión en archivo JSON
-        $sesiones = [];
-        if(file_exists('sesiones.json')) {
-            $sesiones = json_decode(file_get_contents('sesiones.json'), true);
-        }
-        $sesiones[$cookie] = [
-            'nombre' => $nombre,
-            'identificacion' => $identificacion,
-            'telefono' => $telefono,
-            'codigo_otp' => $codigo,
-            'fecha' => time()
-        ];
-        file_put_contents('sesiones.json', json_encode($sesiones));
+        // Guardar sesión en BASE DE DATOS
+        $db->guardarOTP($cookie, $identificacion, $nombre, $telefono, $codigo);
 
         enviarsms($telefono, "FECOLSUBSIDIO - Su codigo de validacion para aguinaldo es: $codigo");
 
-        header("Location: index_admin_simple.php?a=validar&identificacion=$identificacion");
+        header("Location: index.php?a=validar&identificacion=$identificacion");
         exit;
     }
 }
@@ -72,8 +63,12 @@ if($a=="validar")
         exit;
     }
 
-    $sesiones = json_decode(file_get_contents('sesiones.json'), true);
-    $sesion = $sesiones[$_COOKIE['fecagu']];
+    $sesion = $db->obtenerSesion($_COOKIE['fecagu']);
+
+    if(!$sesion) {
+        header("Location: index_admin_simple.php?m=" . urlencode('Sesión expirada o inválida'));
+        exit;
+    }
     ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +94,7 @@ if($a=="validar")
             </div>
             <div class="col-lg-3"></div>
         </div>
-        <form name="loginform" id="loginform" action="index_admin_simple.php?a=validar2" method="POST">
+        <form name="loginform" id="loginform" action="index.php?a=validar2" method="POST">
             <div class="row">
             <div class="col-lg-4"></div>
             <div class="col-lg-4">
@@ -145,18 +140,22 @@ if($a=="validar2")
         exit;
     }
 
-    $sesiones = json_decode(file_get_contents('sesiones.json'), true);
-    $sesion = $sesiones[$_COOKIE['fecagu']];
-
     $identificacion_post = $_POST['identificacion'];
     $codigo_post = $_POST['codigo'];
 
-    if($sesion['identificacion'] == $identificacion_post && $sesion['codigo_otp'] == $codigo_post)
-    {
-        setcookie('fecaguotp', time());
-        
-        // ========== GENERAR PDF AUTOMÁTICAMENTE ==========
-        $identificacion_buscar = $sesion['identificacion'];
+    // Validar OTP en la BD
+    $resultado = $db->validarOTP($_COOKIE['fecagu'], $codigo_post);
+
+    if(!$resultado['exito']) {
+        header("Location: index_admin_simple.php?a=validar&identificacion=" . $identificacion_post . "&m=" . urlencode($resultado['mensaje']));
+        exit;
+    }
+
+    setcookie('fecaguotp', time());
+
+    // Obtener la sesión validada
+    $sesion = $db->obtenerSesion($_COOKIE['fecagu']);
+    $identificacion_buscar = $sesion['identificacion'];
 
         require 'vendor/autoload.php';
         require('fpdf/fpdf.php');
@@ -241,10 +240,6 @@ if($a=="validar2")
             header("Location: index_admin_simple.php?m=" . urlencode("Error al generar el PDF: " . $e->getMessage()));
             exit;
         }
-    } else {
-        header("Location: index_admin_simple.php?a=validar&identificacion=" . $identificacion_post . "&m=" . urlencode('Código incorrecto'));
-        exit;
-    }
 }
 
 // ========== ACCIÓN: SALIR ==========
@@ -290,7 +285,7 @@ if(isset($_GET['m'])) {
             </div>
             <div class="col-lg-3"></div>
         </div>
-        <form name="loginform" id="loginform" action="index_admin_simple.php?a=login" method="POST">
+        <form name="loginform" id="loginform" action="index.php?a=login" method="POST">
             <div class="row">
             <div class="col-lg-4"></div>
             <div class="col-lg-4">
