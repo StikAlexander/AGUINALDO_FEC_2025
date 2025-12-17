@@ -603,11 +603,19 @@ if($a=="generar_pdf")
         require('vendor/autoload.php');
 
         $pdf = new \setasign\Fpdi\Fpdi();
-        $pdf->AddPage();
-
+        
         // Importar la plantilla PDF existente
         $pdf->setSourceFile('plantilla_aguinaldo.pdf');
         $tplId = $pdf->importPage(1);
+        
+        // Obtener dimensiones de la página original
+        $size = $pdf->getImportedPageSize($tplId);
+        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P'; // L=Landscape, P=Portrait
+        
+        // Crear página con la orientación y tamaño correcto
+        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+        
+        // Usar la plantilla
         $pdf->useTemplate($tplId);
 
         // Configurar fuente
