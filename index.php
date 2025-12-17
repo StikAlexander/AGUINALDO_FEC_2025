@@ -603,40 +603,44 @@ if($a=="generar_pdf")
         require('vendor/autoload.php');
 
         $pdf = new \setasign\Fpdi\Fpdi();
-        
+
         // Importar la plantilla PDF existente
         $pdf->setSourceFile('plantilla_aguinaldo.pdf');
         $tplId = $pdf->importPage(1);
-        
+
         // Obtener dimensiones de la página original
         $size = $pdf->getImportedPageSize($tplId);
         $orientation = ($size['width'] > $size['height']) ? 'L' : 'P'; // L=Landscape, P=Portrait
-        
+
         // Crear página con la orientación y tamaño correcto
         $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-        
+
         // Usar la plantilla
         $pdf->useTemplate($tplId);
 
         // Configurar fuente
-        $pdf->SetFont('Helvetica', '', 12);
+        //$pdf->SetFont('Helvetica', '', 12);
         $pdf->SetTextColor(0, 0, 0);
 
         // Escribir los 4 campos en coordenadas fijas (ajustar según tu plantilla)
         // Campo 1: Estimado(a) - Nombre completo
-        $pdf->SetXY(50, 60);
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(10, 98.5);
         $pdf->Write(0, $datos['nombre']);
 
         // Campo 2: Valor aguinaldo 2025
-        $pdf->SetXY(50, 80);
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(127, 98.5);
         $pdf->Write(0, '$' . number_format($datos['valor_aguinaldo'], 0, ',', '.'));
 
         // Campo 3: Valor retención en la fuente
-        $pdf->SetXY(50, 100);
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(41, 118);
         $pdf->Write(0, '$' . number_format($datos['valor_retencion'], 0, ',', '.'));
 
         // Campo 4: Valor abonado a los depósitos
-        $pdf->SetXY(50, 120);
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetXY(127, 118);
         $pdf->Write(0, '$' . number_format($datos['valor_abonado'], 0, ',', '.'));
 
         // Salida del PDF
